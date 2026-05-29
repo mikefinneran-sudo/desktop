@@ -7,8 +7,9 @@ This is a versioned config/mods bundle for Mike's stock Zen Browser install. It 
 - `policies/policies.json`: disables telemetry/studies/Pocket/sponsored/recommended surfaces, disables Firefox hosted AI surfaces, force-installs uBlock Origin, 1Password, and Firefox Multi-Account Containers, and adds the placeholder SearXNG engine.
 - `prefs/user.js`: enables legacy profile CSS, Zen vertical tabs, compact mode, split-view prefs, containers, dense UI defaults, and first-run skips.
 - `chrome/userChrome.css` and `chrome/userContent.css`: compact dark UI polish for Zen chrome and built-in pages.
-- `scripts/zen-ops.sh`: launches a dedicated ops profile on debug port `9333`, opens the dashboard placeholder, and checks DGX health.
+- `scripts/zen-ops.sh`: launches a dedicated ops profile on debug port `9333`, opens the local helper dashboard, and checks DGX health.
 - `helper/server.py`: local-only Phase B helper at `127.0.0.1:8787`.
+- `helper/dashboard.html`: same-origin ops dashboard served by the helper.
 - `mods/*`: independent temporary WebExtension-style mods for DGX summary, clipping research, and the Linear stub.
 
 ## Install
@@ -55,12 +56,20 @@ Existing `user.js`, `chrome/`, and app `policies.json` are backed up adjacent to
 bash walterfetch/scripts/zen-ops.sh
 ```
 
-Set one of these before using it for real:
+By default, the launcher opens the local helper dashboard:
 
 ```sh
-export HETZNER_HOST="example-host"
-# or
-export WALTERFETCH_DASHBOARD_URL="http://example-host:8002/v3/dashboard"
+http://127.0.0.1:8787/dashboard
+```
+
+The helper may not be running when Zen opens the tab. That is expected; reload the tab after `walterfetch/scripts/start-helper.sh` or the launchd helper is running.
+
+Useful overrides:
+
+```sh
+export WALTERFETCH_DASHBOARD_URL="http://127.0.0.1:8787/dashboard"
+export WALTERFETCH_HELPER_EXPECTED=0  # launch without a dashboard tab
+export WF_HELPER_PORT=8788
 ```
 
 The launcher prints an alias snippet for `~/.zshrc`; it does not edit shell config.
@@ -86,6 +95,56 @@ Health check:
 ```sh
 curl -s http://127.0.0.1:8787/health
 ```
+
+Ops dashboard:
+
+```sh
+open http://127.0.0.1:8787/dashboard
+curl -s http://127.0.0.1:8787/status
+```
+
+`/status` always returns HTTP 200 from the helper itself. Dead upstream services are reported inside their own service object instead of failing the whole request:
+
+```json
+{
+  "ok": true,
+  "checked_at": "2026-05-29T12:00:00+00:00",
+  "services": {
+    "dgx": {
+      "up": true,
+      "detail": "model listed",
+      "model": "Intel/Qwen3.5-122B-A10B-int4-AutoRound",
+      "url": "http://192.168.68.62:8000/v1/models"
+    },
+    "searxng": {
+      "up": true,
+      "detail": "HTTP 200",
+      "url": "http://100.114.213.8:8890"
+    },
+    "walterfetch_api": {
+      "up": true,
+      "detail": "HTTP 200",
+      "url": "http://100.78.198.105:8002"
+    }
+  },
+  "run_progress": {
+    "configured": false,
+    "up": false,
+    "detail": "not configured"
+  }
+}
+```
+
+Dashboard-related environment variables:
+
+- `SEARXNG_URL`: defaults to `http://100.114.213.8:8890`.
+- `WALTERFETCH_API_URL`: defaults to `http://100.78.198.105:8002`.
+- `WALTERFETCH_RUN_STATUS_URL`: optional JSON or text endpoint for authoritative run-progress data.
+- `WALTERFETCH_RUN_STATUS_FILE`: optional JSON or text file for authoritative run-progress data.
+- `WALTERFETCH_DASHBOARD_URL`: optional `zen-ops.sh` dashboard tab override.
+- `WALTERFETCH_HELPER_EXPECTED=0`: tells `zen-ops.sh` to launch without a dashboard tab.
+
+Run progress is intentionally shown as `not configured` unless `WALTERFETCH_RUN_STATUS_URL` or `WALTERFETCH_RUN_STATUS_FILE` is set.
 
 Launchd install:
 
@@ -143,6 +202,6 @@ Policy structure and macOS `policies.json` placement follow Mozilla Firefox Ente
 ## Open TODOs
 
 - Replace the SearXNG placeholder URL in `policies/policies.json`.
-- Set the real Hetzner dashboard host or `WALTERFETCH_DASHBOARD_URL`.
+- Wire an authoritative run-progress URL or file when that data source exists.
 - Decide blank homepage/newtab versus WalterSignal dashboard.
 - Decide whether and how to wire Linear token handling.

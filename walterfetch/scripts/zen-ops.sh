@@ -19,18 +19,21 @@ ops_profile="${ZEN_OPS_PROFILE:-$HOME/Library/Application Support/zen/Profiles/w
 debug_port="${ZEN_OPS_DEBUG_PORT:-9333}"
 dgx_base="${DGX_BASE_URL:-http://192.168.68.62:8000}"
 dgx_fallback="${DGX_FALLBACK_URL:-http://100.114.213.8:8000}"
+helper_port="${WF_HELPER_PORT:-8787}"
+helper_expected="${WALTERFETCH_HELPER_EXPECTED:-1}"
 
-if [[ -n "${WALTERFETCH_DASHBOARD_URL:-}" ]]; then
-  dashboard_url="$WALTERFETCH_DASHBOARD_URL"
-elif [[ -n "${HETZNER_HOST:-}" ]]; then
-  dashboard_url="http://$HETZNER_HOST:8002/v3/dashboard"
-else
-  # No working ops dashboard exists yet (to be built). Launch without one rather
-  # than opening a dead placeholder URL.
-  dashboard_url=""
-fi
+case "$helper_expected" in
+  0|false|False|FALSE|no|No|NO)
+    dashboard_url=""
+    ;;
+  *)
+    dashboard_url="${WALTERFETCH_DASHBOARD_URL:-http://127.0.0.1:$helper_port/dashboard}"
+    ;;
+esac
 
-[[ "$debug_port" != "9222" ]] || die "ZEN_OPS_DEBUG_PORT must not be 9222 (reserved for the Chrome enrichment scraper)."
+# 9222 is the Chrome/Chromium remote-debugging port used by the WalterFetch
+# enrichment scraper. Refuse it so the Zen ops browser can never collide.
+[[ "$debug_port" != "9222" ]] || die "ZEN_OPS_DEBUG_PORT must not be 9222 (reserved for the enrichment scraper)."
 [[ -d "$zen_app" ]] || die "Zen app not found at $zen_app. Set ZEN_APP=/path/to/Zen.app and retry."
 
 mkdir -p "$ops_profile"
@@ -43,11 +46,25 @@ if [[ ! -f "$ops_profile/user.js" ]] && [[ -f "$prefs_src" ]]; then
   log "Seeded ops profile prefs -> $ops_profile/user.js"
 fi
 
-log "DGX health check: $dgx_base/v1/models"
-if ! curl -fsS --max-time 5 "$dgx_base/v1/models"; then
+dgx_models_url="${dgx_base%/}"
+if [[ "$dgx_models_url" == */v1 ]]; then
+  dgx_models_url="$dgx_models_url/models"
+else
+  dgx_models_url="$dgx_models_url/v1/models"
+fi
+
+dgx_fallback_models_url="${dgx_fallback%/}"
+if [[ "$dgx_fallback_models_url" == */v1 ]]; then
+  dgx_fallback_models_url="$dgx_fallback_models_url/models"
+else
+  dgx_fallback_models_url="$dgx_fallback_models_url/v1/models"
+fi
+
+log "DGX health check: $dgx_models_url"
+if ! curl -fsS --max-time 5 "$dgx_models_url"; then
   printf '\n'
-  log "Primary DGX endpoint unavailable, trying fallback: $dgx_fallback/v1/models"
-  curl -fsS --max-time 5 "$dgx_fallback/v1/models" || log "DGX health check failed; continuing to launch Zen."
+  log "Primary DGX endpoint unavailable, trying fallback: $dgx_fallback_models_url"
+  curl -fsS --max-time 5 "$dgx_fallback_models_url" || log "DGX health check failed; continuing to launch Zen."
 fi
 printf '\n'
 
@@ -59,7 +76,7 @@ if [[ -n "$dashboard_url" ]]; then
     --remote-debugging-port="$debug_port" \
     "$dashboard_url"
 else
-  log "No dashboard configured yet (set WALTERFETCH_DASHBOARD_URL once one is built); launching without it."
+  log "Helper dashboard not expected; launching without a dashboard tab."
   open -na "$zen_app" --args \
     --profile "$ops_profile" \
     --remote-debugging-port="$debug_port"
