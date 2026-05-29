@@ -111,10 +111,13 @@ detect_profile() {
       }
       END {
         flush_profile()
-        if (chosen_path != "") {
-          print chosen_path "\t" chosen_isrel
-        } else if (install_path != "") {
+        # Modern Zen/Firefox uses a dedicated profile per install: the [Install]
+        # section Default is authoritative for which profile actually launches.
+        # The legacy [Profile] Default=1 is only the fallback when no [Install].
+        if (install_path != "") {
           print install_path "\t" install_isrel
+        } else if (chosen_path != "") {
+          print chosen_path "\t" chosen_isrel
         } else {
           exit 1
         }

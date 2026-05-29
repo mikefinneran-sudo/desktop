@@ -90,10 +90,12 @@ detect_profile() {
       }
       END {
         flush_profile()
-        if (chosen_path != "") {
-          print chosen_path "\t" chosen_isrel
-        } else if (install_path != "") {
+        # Match install.sh: prefer the [Install] section profile (the one Zen
+        # actually launches) over the legacy [Profile] Default=1.
+        if (install_path != "") {
           print install_path "\t" install_isrel
+        } else if (chosen_path != "") {
+          print chosen_path "\t" chosen_isrel
         } else {
           exit 1
         }
