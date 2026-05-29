@@ -72,12 +72,14 @@ log "Launching Zen ops profile at $ops_profile"
 if [[ -n "$dashboard_url" ]]; then
   log "Dashboard URL: $dashboard_url"
   open -na "$zen_app" --args \
+    --no-remote \
     --profile "$ops_profile" \
     --remote-debugging-port="$debug_port" \
     "$dashboard_url"
 else
   log "Helper dashboard not expected; launching without a dashboard tab."
   open -na "$zen_app" --args \
+    --no-remote \
     --profile "$ops_profile" \
     --remote-debugging-port="$debug_port"
 fi
