@@ -9,13 +9,12 @@ user_pref("zen.tabs.vertical", true);
 user_pref("zen.tabs.vertical.right-side", false);
 user_pref("zen.tabs.show-newtab-vertical", true);
 
-// Zen compact mode.
-user_pref("zen.view.compact.enable-at-startup", true);
-user_pref("zen.view.compact.hide-tabbar", true);
+// Zen compact mode: OFF by default. Enabling it at startup with hide-tabbar
+// hides the sidebar + nav and looks like a chrome-less full-screen window.
+// Leave compact to the user to toggle (Ctrl+Cmd+C); do not force it on.
+user_pref("zen.view.compact.enable-at-startup", false);
+user_pref("zen.view.compact.hide-tabbar", false);
 user_pref("zen.view.compact.hide-toolbar", false);
-user_pref("zen.view.compact.animate-sidebar", true);
-user_pref("zen.view.compact.show-sidebar-and-toolbar-on-hover", true);
-user_pref("zen.view.compact.toolbar-flash-popup", false);
 
 // Zen split view.
 user_pref("zen.splitView.enable-tab-drop", true);
@@ -40,8 +39,7 @@ user_pref("browser.newtabpage.enabled", false);
 user_pref("browser.startup.homepage", "about:blank");
 
 // Dense, dark, ops-oriented defaults.
-user_pref("browser.uidensity", 1);
-user_pref("browser.toolbars.bookmarks.visibility", "never");
+user_pref("browser.uidensity", 0);
 user_pref("browser.tabs.hoverPreview.enabled", false);
 user_pref("browser.download.autohideButton", false);
 user_pref("ui.systemUsesDarkTheme", 1);
