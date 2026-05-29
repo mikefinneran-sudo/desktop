@@ -2,7 +2,23 @@
 
 Zen stores workspaces, pinned tabs, and container site assignment in the profile DB. Treat this as manual per-machine state. The bundle installs the Multi-Account Containers extension and enables container prefs; Mike still needs to create the workspaces and pin/assign sites inside Zen.
 
-## Baseline Steps
+## Automated setup (scripts/setup-workspaces.py)
+
+`scripts/setup-workspaces.py` creates the 5 client workspaces, binds each to its
+container, and pins its tabs by driving Zen over Marionette (chrome-context
+`gZenWorkspaces` API). Zen must not be running on the target profile.
+
+```
+python3 walterfetch/scripts/setup-workspaces.py --profile "<profiles>/xxxx.Default"
+```
+
+Known limitation: reliable only on a **freshly-initialized profile**. On a profile
+with prior session state, `gZenWorkspaces` init blocks under headless Marionette
+(script timeout). To configure a clean daily profile: run on a new bare profile,
+then seed `containers.json` (ids 6-10) + copy `prefs/user.js` + `chrome/`, then
+point `profiles.ini`'s `[Install]` Default at it. Otherwise use the manual steps below.
+
+## Baseline Steps (manual)
 
 1. Run `bash walterfetch/scripts/install.sh`.
 2. Restart Zen and confirm Multi-Account Containers is installed.
