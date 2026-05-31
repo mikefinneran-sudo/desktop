@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.waltersignal.zenhelper</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>python3</string>
+    <string>/Users/mikefinneran/Code/zen-desktop/walterfetch/helper/server.py</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>8787</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/mikefinneran/Code/zen-desktop</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>DGX_BASE_URL</key>
+    <string>http://192.168.68.62:8000/v1</string>
+    <key>DGX_FALLBACK_URL</key>
+    <string>http://100.114.213.8:8000/v1</string>
+    <key>DGX_MODEL</key>
+    <string>Intel/Qwen3.5-122B-A10B-int4-AutoRound</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/mikefinneran/Library/Logs/com.waltersignal.zenhelper.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/mikefinneran/Library/Logs/com.waltersignal.zenhelper.err.log</string>
+</dict>
+</plist>
