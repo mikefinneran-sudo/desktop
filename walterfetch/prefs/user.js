@@ -4,10 +4,9 @@
 
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 
-// Zen vertical tabs.
-user_pref("zen.tabs.vertical", true);
-user_pref("zen.tabs.vertical.right-side", false);
-user_pref("zen.tabs.show-newtab-vertical", true);
+// Horizontal tabs on top (Chrome/Comet-style), not Zen's vertical sidebar.
+user_pref("zen.tabs.vertical", false);
+user_pref("zen.view.use-single-toolbar", false);
 
 // Zen compact mode: OFF by default. Enabling it at startup with hide-tabbar
 // hides the sidebar + nav and looks like a chrome-less full-screen window.
@@ -43,3 +42,6 @@ user_pref("browser.uidensity", 0);
 user_pref("browser.tabs.hoverPreview.enabled", false);
 user_pref("browser.download.autohideButton", false);
 user_pref("ui.systemUsesDarkTheme", 1);
+
+// Keep the bookmark bar visible.
+user_pref("browser.toolbars.bookmarks.visibility", "always");
