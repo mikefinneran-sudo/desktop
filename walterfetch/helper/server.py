@@ -19,7 +19,9 @@ from typing import Any
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8787
-DEFAULT_MODEL = "Intel/Qwen3.5-122B-A10B-int4-AutoRound"
+# Last known id only. The DGX model changes with each Perplexity build, so the
+# live id is read from /v1/models unless DGX_MODEL overrides it.
+DEFAULT_MODEL = "qwen38-27b-dflash2-20260824"
 DEFAULT_DGX_BASE = "http://192.168.68.62:8000/v1"
 DEFAULT_DGX_FALLBACK = "http://100.114.213.8:8000/v1"
 DEFAULT_SEARXNG_URL = "http://192.168.68.62:8890"
@@ -41,7 +43,7 @@ RESEARCH_DIR = env_path(
 )
 DGX_BASE_URL = os.environ.get("DGX_BASE_URL", DEFAULT_DGX_BASE)
 DGX_FALLBACK_URL = os.environ.get("DGX_FALLBACK_URL", DEFAULT_DGX_FALLBACK)
-DGX_MODEL = os.environ.get("DGX_MODEL", DEFAULT_MODEL)
+DGX_MODEL_OVERRIDE = os.environ.get("DGX_MODEL", "")
 DGX_TIMEOUT = float(os.environ.get("DGX_TIMEOUT", "60"))
 SEARXNG_URL = os.environ.get("SEARXNG_URL", DEFAULT_SEARXNG_URL).rstrip("/")
 WALTERFETCH_API_URL = os.environ.get("WALTERFETCH_API_URL", DEFAULT_WALTERFETCH_API_URL).rstrip("/")
@@ -146,6 +148,19 @@ def model_ids(payload: bytes) -> list[str]:
   return ids
 
 
+def dgx_model() -> str:
+  if DGX_MODEL_OVERRIDE:
+    return DGX_MODEL_OVERRIDE
+  try:
+    status, body = get_status_url(models_url(DGX_BASE_URL), "application/json")
+    ids = model_ids(body)
+    if status == 200 and ids:
+      return ids[0]
+  except Exception:
+    pass
+  return DEFAULT_MODEL
+
+
 def check_dgx() -> dict[str, Any]:
   errors: list[str] = []
   bases = [DGX_BASE_URL]
@@ -157,11 +172,12 @@ def check_dgx() -> dict[str, Any]:
     try:
       status, body = get_status_url(url, "application/json")
       ids = model_ids(body)
-      if status == 200 and DGX_MODEL in ids:
+      expected = DGX_MODEL_OVERRIDE or (ids[0] if ids else DEFAULT_MODEL)
+      if status == 200 and expected in ids:
         return {
           "up": True,
           "detail": "model listed",
-          "model": DGX_MODEL,
+          "model": expected,
           "url": url,
         }
       if ids:
@@ -169,13 +185,13 @@ def check_dgx() -> dict[str, Any]:
           "up": False,
           "detail": "HTTP 200 but configured model is not listed",
           "model": ids[0],
-          "expected_model": DGX_MODEL,
+          "expected_model": expected,
           "url": url,
         }
       return {
         "up": False,
         "detail": "HTTP 200 but no model ids returned",
-        "model": DGX_MODEL,
+        "model": expected,
         "url": url,
       }
     except Exception as exc:  # A down DGX must not take down /status.
@@ -184,7 +200,7 @@ def check_dgx() -> dict[str, Any]:
   return {
     "up": False,
     "detail": "; ".join(errors) or "not configured",
-    "model": DGX_MODEL,
+    "model": DGX_MODEL_OVERRIDE or DEFAULT_MODEL,
     "url": models_url(DGX_BASE_URL),
   }
 
@@ -269,7 +285,7 @@ def dgx_summary(data: dict[str, Any]) -> str:
     "open questions, and useful follow-up actions. Do not invent facts."
   )
   payload = {
-    "model": DGX_MODEL,
+    "model": dgx_model(),
     "messages": [
       {
         "role": "system",
@@ -412,7 +428,7 @@ class Handler(BaseHTTPRequestHandler):
           "service": "walterfetch-zen-helper",
           "bind": f"{DEFAULT_HOST}:{DEFAULT_PORT}",
           "research_dir": str(RESEARCH_DIR),
-          "dgx_model": DGX_MODEL,
+          "dgx_model": dgx_model(),
         },
       )
       return
@@ -432,7 +448,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_json(HTTPStatus.OK, {"ok": True, "path": str(path)})
       elif self.path == "/dgx/summarize":
         summary = dgx_summary(data)
-        self.send_json(HTTPStatus.OK, {"ok": True, "summary": summary, "model": DGX_MODEL})
+        self.send_json(HTTPStatus.OK, {"ok": True, "summary": summary, "model": dgx_model()})
       elif self.path == "/linear":
         issue = linear_create_issue(data)
         self.send_json(HTTPStatus.OK, {"ok": True, "issue": issue})

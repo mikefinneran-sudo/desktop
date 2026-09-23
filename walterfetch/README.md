@@ -113,7 +113,7 @@ curl -s http://127.0.0.1:8787/status
     "dgx": {
       "up": true,
       "detail": "model listed",
-      "model": "Intel/Qwen3.5-122B-A10B-int4-AutoRound",
+      "model": "qwen38-27b-dflash2-20260824",
       "url": "http://192.168.68.62:8000/v1/models"
     },
     "searxng": {
