@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "WalterFetch DGX Sidebar",
+  "version": "0.1.0",
+  "description": "Summarize the active Zen tab through the local WalterFetch helper and DGX.",
+  "permissions": [
+    "<all_urls>",
+    "activeTab",
+    "tabs",
+    "http://127.0.0.1:8787/*"
+  ],
+  "sidebar_action": {
+    "default_title": "WalterFetch DGX",
+    "default_panel": "sidebar.html",
+    "browser_style": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dgx-sidebar@waltersignal.local",
+      "strict_min_version": "115.0"
+    }
+  }
+}

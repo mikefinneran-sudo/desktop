@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "WalterFetch Send to Linear",
+  "version": "0.1.0",
+  "description": "Send the active tab title and URL to the local WalterFetch Linear stub.",
+  "permissions": [
+    "activeTab",
+    "notifications",
+    "tabs",
+    "http://127.0.0.1:8787/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_title": "Send to Linear"
+  },
+  "commands": {
+    "send-tab-to-linear": {
+      "suggested_key": {
+        "default": "Alt+Shift+L"
+      },
+      "description": "Send active tab to Linear stub"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "send-to-linear@waltersignal.local",
+      "strict_min_version": "115.0"
+    }
+  }
+}

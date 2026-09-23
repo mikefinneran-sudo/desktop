@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "WalterFetch Clip to Research",
+  "version": "0.1.0",
+  "description": "Send selected page text to the local WalterFetch Research inbox.",
+  "permissions": [
+    "<all_urls>",
+    "activeTab",
+    "contextMenus",
+    "notifications",
+    "tabs",
+    "http://127.0.0.1:8787/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_title": "Clip to Research"
+  },
+  "commands": {
+    "clip-selection": {
+      "suggested_key": {
+        "default": "Alt+Shift+C"
+      },
+      "description": "Clip selected text to Research"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "clip-to-research@waltersignal.local",
+      "strict_min_version": "115.0"
+    }
+  }
+}

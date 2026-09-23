@@ -1,0 +1,83 @@
+/*
+ * WalterFetch Zen chrome polish.
+ * Keep this small: it rides on top of stock Zen vertical tabs and compact mode.
+ */
+
+:root {
+  --walterfetch-accent: #67d4a1;
+  --walterfetch-surface: #101319;
+  --walterfetch-surface-2: #171b23;
+  --walterfetch-border: rgba(148, 163, 184, 0.24);
+  --walterfetch-muted: rgba(226, 232, 240, 0.72);
+  --zen-border-radius: 6px !important;
+  --zen-element-separation: 4px !important;
+  --toolbarbutton-inner-padding: 5px !important;
+  --tab-min-height: 28px !important;
+}
+
+#navigator-toolbox,
+#zen-sidebar-top-buttons,
+#TabsToolbar,
+#nav-bar {
+  background: var(--walterfetch-surface) !important;
+  border-color: var(--walterfetch-border) !important;
+}
+
+#urlbar,
+#searchbar {
+  min-height: 30px !important;
+  border-radius: 6px !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab {
+  min-height: 28px !important;
+  margin-block: 1px !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab .tab-background {
+  border-radius: 6px !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab[selected] .tab-background,
+#tabbrowser-tabs .tabbrowser-tab[visuallyselected] .tab-background {
+  background: color-mix(in srgb, var(--walterfetch-accent) 18%, var(--walterfetch-surface-2)) !important;
+  box-shadow: inset 3px 0 0 var(--walterfetch-accent) !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab:not([selected]):hover .tab-background {
+  background: rgba(148, 163, 184, 0.12) !important;
+}
+
+.tab-label {
+  font-size: 12px !important;
+}
+
+.tab-icon-image,
+.tab-throbber {
+  margin-inline-end: 7px !important;
+}
+
+#zen-workspaces-button toolbarbutton[active="true"] {
+  background: rgba(103, 212, 161, 0.16) !important;
+  color: #dffbed !important;
+}
+
+#zen-workspaces-button toolbarbutton {
+  border-radius: 6px !important;
+}
+
+#PersonalToolbar,
+#statuspanel-label {
+  background: var(--walterfetch-surface-2) !important;
+  border-color: var(--walterfetch-border) !important;
+  color: var(--walterfetch-muted) !important;
+}
+
+toolbarbutton,
+.toolbarbutton-1 {
+  border-radius: 6px !important;
+}
+
+:root[zen-compact-mode="true"] #navigator-toolbox {
+  --toolbarbutton-inner-padding: 4px !important;
+}

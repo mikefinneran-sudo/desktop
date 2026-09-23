@@ -1,0 +1,41 @@
+/*
+ * WalterFetch page-level tweaks for built-in pages.
+ */
+
+@-moz-document url("about:newtab"), url("about:home"), url("about:privatebrowsing") {
+  body,
+  .outer-wrapper,
+  main {
+    background: #0f1218 !important;
+    color: #e5e7eb !important;
+  }
+
+  .logo-and-wordmark,
+  .top-sites-list,
+  .personalize-button,
+  .icon-settings,
+  .customize-menu {
+    filter: saturate(0.75) !important;
+  }
+
+  .search-wrapper input {
+    background: #171b23 !important;
+    border: 1px solid rgba(148, 163, 184, 0.24) !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+    box-shadow: none !important;
+  }
+
+  .top-site-outer .tile {
+    background: #171b23 !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+  }
+}
+
+@-moz-document url-prefix("about:reader") {
+  body {
+    line-height: 1.55 !important;
+  }
+}

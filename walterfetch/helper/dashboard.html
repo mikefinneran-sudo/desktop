@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WalterFetch Ops</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f8;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #65707c;
+      --line: #d8dee4;
+      --accent: #005f73;
+      --good: #16794c;
+      --bad: #b42318;
+      --warn: #9a6700;
+      --shadow: 0 8px 28px rgba(32, 36, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      min-height: 92px;
+      padding: 20px 0;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 0.86rem;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .state-line {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      flex: 0 0 11px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 0 3px rgba(154, 103, 0, 0.16);
+    }
+
+    .is-up .dot {
+      background: var(--good);
+      box-shadow: 0 0 0 3px rgba(22, 121, 76, 0.16);
+    }
+
+    .is-down .dot {
+      background: var(--bad);
+      box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid #0a4e5f;
+      border-radius: 7px;
+      background: var(--accent);
+      color: #ffffff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.74;
+    }
+
+    main {
+      padding: 24px 0 40px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .status-card,
+    .run-panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .status-card {
+      display: grid;
+      gap: 12px;
+      min-height: 172px;
+      padding: 16px;
+    }
+
+    .status-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      border: 0;
+      background: transparent;
+    }
+
+    .service-name {
+      overflow-wrap: anywhere;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .detail {
+      min-height: 44px;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 7px 10px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    dt {
+      font-weight: 800;
+      color: #3f4752;
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .run-panel {
+      padding: 18px;
+    }
+
+    .run-body {
+      margin-top: 12px;
+      color: var(--text);
+    }
+
+    pre {
+      max-height: 360px;
+      overflow: auto;
+      margin: 12px 0 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #111827;
+      color: #e5edf5;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .placeholder {
+      display: grid;
+      min-height: 160px;
+      place-items: center;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        min-height: 0;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div>
+        <h1>WalterFetch Ops</h1>
+        <div class="meta">
+          <span id="overall-state" class="state-line">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="overall-text">Loading status</span>
+          </span>
+          <span>Last checked: <time id="checked-at">pending</time></span>
+        </div>
+      </div>
+      <button id="refresh" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section aria-labelledby="services-heading">
+      <div class="section-head">
+        <h2 id="services-heading">Services</h2>
+      </div>
+      <div id="services" class="status-grid">
+        <div class="placeholder">Loading service status</div>
+      </div>
+    </section>
+
+    <section aria-labelledby="run-heading">
+      <div class="section-head">
+        <h2 id="run-heading">Run Progress</h2>
+        <span id="run-state" class="badge">not configured</span>
+      </div>
+      <div class="run-panel">
+        <div id="run-body" class="run-body">not configured</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const POLL_MS = 15000;
+    const SERVICE_ORDER = [
+      ["dgx", "DGX"],
+      ["searxng", "SearXNG"],
+      ["walterfetch_api", "WalterFetch API"]
+    ];
+
+    const servicesEl = document.getElementById("services");
+    const checkedAtEl = document.getElementById("checked-at");
+    const overallStateEl = document.getElementById("overall-state");
+    const overallTextEl = document.getElementById("overall-text");
+    const refreshButton = document.getElementById("refresh");
+    const runStateEl = document.getElementById("run-state");
+    const runBodyEl = document.getElementById("run-body");
+
+    let pollTimer = null;
+
+    function stateClass(up) {
+      if (up === true) return "is-up";
+      if (up === false) return "is-down";
+      return "";
+    }
+
+    function stateText(up) {
+      if (up === true) return "up";
+      if (up === false) return "down";
+      return "unknown";
+    }
+
+    function formatTime(value) {
+      if (!value) return "unknown";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function appendField(list, label, value) {
+      if (value === undefined || value === null || value === "") return;
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const detail = document.createElement("dd");
+      detail.textContent = String(value);
+      list.append(term, detail);
+    }
+
+    function serviceCard(name, label, service) {
+      const card = document.createElement("article");
+      card.className = `status-card ${stateClass(service.up)}`;
+
+      const header = document.createElement("header");
+      const title = document.createElement("div");
+      title.className = "service-name";
+      title.textContent = label;
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.setAttribute("aria-hidden", "true");
+      const badgeText = document.createElement("span");
+      badgeText.textContent = stateText(service.up);
+      badge.append(dot, badgeText);
+      header.append(title, badge);
+
+      const detail = document.createElement("div");
+      detail.className = "detail";
+      detail.textContent = service.detail || "No detail reported";
+
+      const fields = document.createElement("dl");
+      appendField(fields, "Model", service.model);
+      appendField(fields, "Expected", service.expected_model);
+      appendField(fields, "URL", service.url);
+
+      card.append(header, detail, fields);
+      return card;
+    }
+
+    function renderServices(services) {
+      const cards = [];
+      for (const [name, label] of SERVICE_ORDER) {
+        cards.push(serviceCard(name, label, services[name] || { up: null, detail: "missing from /status" }));
+      }
+      servicesEl.replaceChildren(...cards);
+    }
+
+    function renderRunProgress(progress) {
+      const configured = Boolean(progress && progress.configured);
+      const up = Boolean(progress && progress.up);
+      runStateEl.textContent = configured ? stateText(up) : "not configured";
+      runStateEl.className = `badge ${configured ? stateClass(up) : ""}`;
+      runBodyEl.replaceChildren();
+
+      if (!configured) {
+        runBodyEl.textContent = "not configured";
+        return;
+      }
+
+      const detail = document.createElement("div");
+      detail.textContent = progress.detail || stateText(up);
+      runBodyEl.append(detail);
+
+      if (progress.data !== undefined) {
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(progress.data, null, 2);
+        runBodyEl.append(pre);
+      }
+    }
+
+    function renderOverall(services) {
+      const entries = SERVICE_ORDER.map(([name]) => services[name]).filter(Boolean);
+      const upCount = entries.filter((service) => service.up === true).length;
+      const allUp = entries.length > 0 && upCount === entries.length;
+      overallStateEl.className = `state-line ${allUp ? "is-up" : "is-down"}`;
+      overallTextEl.textContent = `${upCount}/${SERVICE_ORDER.length} services up`;
+    }
+
+    function renderStatus(data) {
+      checkedAtEl.textContent = formatTime(data.checked_at);
+      renderServices(data.services || {});
+      renderOverall(data.services || {});
+      renderRunProgress(data.run_progress || { configured: false, detail: "not configured" });
+    }
+
+    function renderError(error) {
+      overallStateEl.className = "state-line is-down";
+      overallTextEl.textContent = "status unavailable";
+      checkedAtEl.textContent = formatTime(new Date().toISOString());
+      servicesEl.replaceChildren();
+      const placeholder = document.createElement("div");
+      placeholder.className = "placeholder";
+      placeholder.textContent = error.message || "Unable to load /status";
+      servicesEl.append(placeholder);
+      renderRunProgress({ configured: false, detail: "not configured" });
+    }
+
+    async function loadStatus() {
+      refreshButton.disabled = true;
+      try {
+        const response = await fetch("/status", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        renderStatus(await response.json());
+      } catch (error) {
+        renderError(error);
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function schedulePoll() {
+      if (pollTimer) window.clearInterval(pollTimer);
+      pollTimer = window.setInterval(loadStatus, POLL_MS);
+    }
+
+    refreshButton.addEventListener("click", loadStatus);
+    loadStatus();
+    schedulePoll();
+  </script>
+</body>
+</html>
